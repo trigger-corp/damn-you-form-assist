@@ -2,10 +2,18 @@
 //  damn_you_form_assist_API.h
 //  ForgeModule
 //
-//  Created by Alex Horak on 1/14/13.
 //
 
 #import <Foundation/Foundation.h>
+#import <objc/runtime.h>
+#import <UIKit/UIKit.h>
+
+@interface UIWebView (accessoryHiding)
+
+@property (nonatomic, assign) BOOL hidesInputAccessoryView;
+
+@end
 
 @interface damn_you_form_assist_API : NSObject
+
 @end

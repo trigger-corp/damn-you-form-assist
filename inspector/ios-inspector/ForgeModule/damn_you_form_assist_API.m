@@ -2,40 +2,75 @@
 //  damn_you_form_assist_API.m
 //  ForgeModule
 //
-//  Created by Alex Horak on 1/14/13.
 //
 
 #import "damn_you_form_assist_API.h"
-#import <QuartzCore/QuartzCore.h>
 
 @implementation damn_you_form_assist_API
 
-+ (void)killBar:(ForgeTask *)task {
++ (void)hideBar:(ForgeTask*)task {
     
-    [[NSNotificationCenter defaultCenter] addObserverForName:@"UIKeyboardCandidateCorrectionDidChangeNotification" object:nil queue:[NSOperationQueue mainQueue] usingBlock:^(NSNotification *note) {
-        UIWindow *keyboardWindow = nil;
-        for (UIWindow *testWindow in [[UIApplication sharedApplication] windows]) {
-            if (![[testWindow class] isEqual:[UIWindow class]]) {
-                keyboardWindow = testWindow;
-            }
-        }   
-        
-        // Locate UIWebFormViedw.
-        for (UIView *possibleFormView in [keyboardWindow subviews]) {
-            // iOS 5 sticks the UIWebFormView inside a UIPeripheralHostView.
-            if ([[possibleFormView description] rangeOfString:@"UIPeripheralHostView"].location != NSNotFound) {
-                for (UIView *subviewWhichIsPossibleFormView in [possibleFormView subviews]) {
-                    if ([[subviewWhichIsPossibleFormView description] rangeOfString:@"UIWebFormAccessory"].location != NSNotFound) {
-                        [subviewWhichIsPossibleFormView removeFromSuperview];
-                    }
-                    if ([[subviewWhichIsPossibleFormView description] rangeOfString:@"UIImageView"].location != NSNotFound) {
-                        [[subviewWhichIsPossibleFormView layer] setOpacity: 0.0];
-                    }
-                }
-            }
+    UIWebView *webView = [ForgeApp sharedApp].webView;
+    webView.hidesInputAccessoryView = YES;
+    [task success:@"Bar removed."];
+    
+}
+
+@end
+
+@implementation UIWebView (accessoryHiding)
+
+static const char * const fixClassName = "UIWebBrowserViewMinusAccessoryView";
+static Class fixClass = Nil;
+
+- (UIView *)findBrowserView {
+    UIScrollView *scrollView = self.scrollView;
+    
+    UIView *browserView = nil;
+    for (UIView *subview in scrollView.subviews) {
+        if ([NSStringFromClass([subview class]) hasPrefix:@"UIWebBrowserView"]) {
+            browserView = subview;
+            break;
         }
-		[task success:nil];
-    }];
+    }
+    return browserView;
+}
+
+- (id)methodReturningNil {
+    return nil;
+}
+
+- (void)ensureSubclassExistsOfBrowserViewClass:(Class)browserViewClass {
+    if (!fixClass) {
+        Class newClass = objc_allocateClassPair(browserViewClass, fixClassName, 0);
+        IMP nilImp = [self methodForSelector:@selector(methodReturningNil)];
+        class_addMethod(newClass, @selector(inputAccessoryView), nilImp, "@@:");
+        objc_registerClassPair(newClass);
+        
+        fixClass = newClass;
+    }
+}
+
+- (BOOL) hidesInputAccessoryView {
+    UIView *browserView = [self findBrowserView];
+    return [browserView class] == fixClass;
+}
+
+- (void) setHidesInputAccessoryView:(BOOL)value {
+    UIView *browserView = [self findBrowserView];
+    if (browserView == nil) {
+        return;
+    }
+    [self ensureSubclassExistsOfBrowserViewClass:[browserView class]];
+    
+    if (value) {
+        object_setClass(browserView, fixClass);
+    }
+    else {
+        Class normalClass = objc_getClass("UIWebBrowserView");
+        object_setClass(browserView, normalClass);
+    }
+    [browserView reloadInputViews];
 }
 
 @end
