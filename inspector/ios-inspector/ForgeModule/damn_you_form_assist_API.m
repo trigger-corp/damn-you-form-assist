@@ -8,7 +8,7 @@
 
 @implementation damn_you_form_assist_API
 
-+ (void)hideBar:(ForgeTask*)task {
++ (void)killBar:(ForgeTask*)task {
     
     UIWebView *webView = [ForgeApp sharedApp].webView;
     webView.hidesInputAccessoryView = YES;
