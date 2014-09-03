@@ -4,16 +4,22 @@
 //
 //
 
+#import <WebKit/WebKit.h>
+
 #import "damn_you_form_assist_API.h"
 
 @implementation damn_you_form_assist_API
 
 + (void)killBar:(ForgeTask*)task {
-    
-    UIWebView *webView = [ForgeApp sharedApp].webView;
-    webView.hidesInputAccessoryView = YES;
+    if ([[ForgeApp sharedApp] useWKWebView] && NSClassFromString(@"WKWebView")) {
+        WKWebView *webView = (WKWebView*)[[ForgeApp sharedApp] webView];
+        // TODO handle iOS 8
+    } else {
+        UIWebView *webView = (UIWebView*)[[ForgeApp sharedApp] webView];
+        webView.hidesInputAccessoryView = YES;
+    }
+
     [task success:@"Bar removed."];
-    
 }
 
 @end
