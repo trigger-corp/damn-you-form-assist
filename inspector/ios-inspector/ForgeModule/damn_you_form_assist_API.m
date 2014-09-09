@@ -11,9 +11,10 @@
 @implementation damn_you_form_assist_API
 
 + (void)killBar:(ForgeTask*)task {
-    if ([[ForgeApp sharedApp] useWKWebView] && NSClassFromString(@"WKWebView")) {
+    if (NSClassFromString(@"WKWebView") && [[ForgeApp sharedApp] useWKWebView]) {
         WKWebView *webView = (WKWebView*)[[ForgeApp sharedApp] webView];
         // TODO handle iOS 8
+        [ForgeLog w:@"iOS8 does not currently support hiding of the accessory view"];
     } else {
         UIWebView *webView = (UIWebView*)[[ForgeApp sharedApp] webView];
         webView.hidesInputAccessoryView = YES;
